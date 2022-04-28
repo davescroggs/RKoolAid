@@ -1,0 +1,69 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+library(tidyverse)
+library(nycflights13)
+options(scipen = 999)
+```
+
+# Tutorial - Mutate & Summarise
+
+From the description
+
+## Mutate
+
+`mutate()` adds new variables and preserves existing ones; transmute() adds new variables and drops existing ones. New variables overwrite existing variables of the same name. Variables can be removed by setting their value to NULL.
+
+The mutate function must return a vector of the same length as the tibble/dataframe used in the data argument, or for grouped data, the length of the group. Functions that are called inside mutate can take column names as an argument which will input the column **as a vector** (or sections of the vector by group).
+
+```{r}
+print_and_return <- function(x) {
+  print(x)
+  return(x)
+}
+
+tbl <- tibble(A = 1:4,grp = rep(LETTERS[1:2],each = 2)) %>% 
+  mutate(res = print_and_return(A))
+
+# Vectors by group
+tbl <- tibble(A = 1:4,grp = rep(LETTERS[1:2],each = 2)) %>% 
+  group_by(grp) %>% 
+  mutate(res = print_and_return(A))
+```
+
+If a single result is given for a group, it is repeated for the length of the group.
+
+```{r}
+tibble(A = rnorm(5)) %>% 
+  mutate(B = 1,
+         C = mean(A))
+```
+
+
+### Common use cases
+
+#### Calculating percentages of a single row as part of a group
+
+```{r warning=FALSE}
+planes %>% 
+  group_by(type,engines) %>% 
+  summarise(n = n(),.groups = "drop_last") %>% 
+  # last group in group by is dropped
+  # This call takes
+  mutate(sum_n = sum(n),
+         pct = n/sum_n,
+         pct_label = scales::percent(pct))
+```
+
+## Summarise
+
+`summarise()` creates a new data frame. It will have one (or more) rows for each combination of grouping variables; if there are no grouping variables, the output will have a single row summarising all observations in the input. It will contain one column for each grouping variable and one column for each of the summary statistics that you have specified.
