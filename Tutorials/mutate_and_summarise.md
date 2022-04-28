@@ -36,6 +36,67 @@ tbl <- tibble(A = 1:4,grp = rep(LETTERS[1:2],each = 2)) %>%
 #> [1] 3 4
 ```
 
+### Vectorised functions
+
+``` r
+tibble(A = 1:3,B = 4:6) %>% 
+  mutate(C = sum(A,B),
+         D = A + B)
+#> # A tibble: 3 × 4
+#>       A     B     C     D
+#>   <int> <int> <int> <int>
+#> 1     1     4    21     5
+#> 2     2     5    21     7
+#> 3     3     6    21     9
+
+
+tibble(A = 1:3,B = 4:6) %>% 
+  mutate(C = max(A,B),
+         D = pmax(A, B))
+#> # A tibble: 3 × 4
+#>       A     B     C     D
+#>   <int> <int> <int> <int>
+#> 1     1     4     6     4
+#> 2     2     5     6     5
+#> 3     3     6     6     6
+```
+
+Vectorisation is faster. Friends don’t let friends use rowwise.
+
+``` r
+dat <- tibble(A = rnorm(1E5),B = rnorm(1E5))
+start_time = Sys.time()
+dat %>% 
+  rowwise() %>% 
+  mutate(C = sum(A,B)) %>% 
+  print(n = 3)
+#> # A tibble: 100,000 × 3
+#> # Rowwise: 
+#>        A      B      C
+#>    <dbl>  <dbl>  <dbl>
+#> 1  0.288 -2.41  -2.12 
+#> 2 -0.532  1.82   1.29 
+#> 3 -0.185 -0.124 -0.309
+#> # … with 99,997 more rows
+
+Sys.time() - start_time
+#> Time difference of 0.6779749 secs
+
+start_time = Sys.time()
+dat %>% 
+  mutate(D = A + B) %>% 
+  print(n = 3)
+#> # A tibble: 100,000 × 3
+#>        A      B      D
+#>    <dbl>  <dbl>  <dbl>
+#> 1  0.288 -2.41  -2.12 
+#> 2 -0.532  1.82   1.29 
+#> 3 -0.185 -0.124 -0.309
+#> # … with 99,997 more rows
+Sys.time() - start_time
+#> Time difference of 0.02084613 secs
+```
+
 If a single result is given for a group, it is repeated for the length
 of the group.
 
@@ -44,13 +105,13 @@ tibble(A = rnorm(5)) %>%
   mutate(B = 1,
          C = mean(A))
 #> # A tibble: 5 × 3
-#>           A     B      C
-#>       <dbl> <dbl>  <dbl>
-#> 1  0.0920       1 -0.305
-#> 2 -0.647        1 -0.305
-#> 3 -0.000905     1 -0.305
-#> 4  0.389        1 -0.305
-#> 5 -1.36         1 -0.305
+#>        A     B      C
+#>    <dbl> <dbl>  <dbl>
+#> 1 -0.214     1 -0.489
+#> 2 -0.351     1 -0.489
+#> 3  0.371     1 -0.489
+#> 4 -0.875     1 -0.489
+#> 5 -1.37      1 -0.489
 ```
 
 ### Common use cases
