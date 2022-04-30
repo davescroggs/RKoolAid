@@ -29,6 +29,7 @@ data:*
 
 ## Tutorials
 
-1.  Tips, tricks and the RStudio IDE
-2.  Mutate & summarise
-3.  
+1.  Why R & the Tidyverse?
+2.  Tips, tricks and the RStudio IDE
+3.  Mutate & summarise
+4.  

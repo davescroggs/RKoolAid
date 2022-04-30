@@ -1,0 +1,107 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(tidyverse)
+```
+
+# Why Tidyverse?
+
+-   Function(s) or package for everything
+-   Tools designed for efficient EDA
+-   Functions describe their actions
+-   Provide a consistent format for organisations to build on
+
+### Tidyverse packages
+
+These packages and functions are well maintained, open source, and under continual improvement.
+
+    -   dplyr: data manipulation
+
+    -   stringr: string manipulation
+
+    -   tidyr: data exploration tools
+
+    -   purrr: functional iteration (loops)
+
+    -   lubridate: date/time maniupulation
+
+    -   readr: read different data types
+
+### EDA, all day
+
+Exploratory Data Analysis (EDA) is a fundamental skill in data science. Tidyverse functions
+
+```{r}
+data()
+rm(txhousing)
+```
+
+### QA, 'erry day
+
+There are lots of different ways to solve problems, some ways offer more transparent methods for checking whether the result was as intended. By storing data in tables and retaining the original value, you can use various methods to check the result.
+
+For example, below I have attempted to extract the title and first name of the passengers in the Titanic dataset. It appears as if the title is preceded by a comma. We can apply the regex below to see if that result works for the entire dataset, and come up with checks for ways it might fail. For example I have use the length of the first name, sorted smallest to largest, to check for very short names.
+
+```{r}
+titanic::titanic_train %>% 
+  select(Name) %>% 
+  mutate(title = str_extract(Name,"(?<=\\, )\\w+"),
+    first_name = str_extract(Name,"(?<=\\. )\\w+"),
+         first_name_len = str_length(first_name)) %>% 
+  arrange(first_name_len) %>% 
+  head(3)
+```
+
+We can also check the unique results from the regex to see if any odd/missing results are obtained. We can see below that one result has returned "the" as a title. Looking up that individual result shows that the regex has failed to account for a two word title. We can then update the regex to look for results that are followed by a full stop.
+
+```{r}
+titanic::titanic_train %>% 
+  select(Name) %>% 
+  mutate(title = str_extract(Name,"(?<=\\, )\\w+")) %>% 
+  count(title) %>% 
+  arrange(n) %>% 
+  head(8)
+
+titanic::titanic_train %>% 
+  mutate(title = str_extract(Name,"(?<=\\, )\\w+")) %>% 
+  filter(title == "the")
+```
+
+### Tidyverse code doubles as pseudo-comments
+
+From the [dplyr site](https://dplyr.tidyverse.org) - *"dplyr is a grammar of data manipulation, providing a consistent set of verbs that help you solve the most common data manipulation challenges."*
+
+Functions describe the action being taken - filter, select, summarise, arrange - these functions allow readers to know what action is being taken in each step without additional comments.
+
+Additionally, pipes allow for chaining together logical, step-wise and reversible data pipelines. For example the code below converts row names to a column variable, extracts the car brand from the model name, lumps infrequent brands together, overwrites the mpg variable to a log scale, and provides mean mpg and record counts for each brand, arranged by count.
+
+    ```{r}
+    mtcars %>% 
+      rownames_to_column(var = "model") %>% 
+      mutate(brand = str_extract(model,"\\w+"),
+             brand = fct_lump(brand,5),
+             mpg = log(mpg)) %>% 
+      group_by(brand) %>% 
+      summarise(ave_mpg = mean(mpg),
+                n = n()) %>% 
+      arrange(-n)
+    ```
+
+The chain of transforms applied to each step is logical, following a mental model of stepping through a process. These actions never alter (unless specified) the underlying data-set, meaning that any changes are temporary and reversible, allowing for a trial and error process in applying each transform.
+
+### One in, all in - Consistent format
+
+In most cases, EDA and data manipulation follows a similar format, irrespective of the language or library being used. These languages and libraries all do similar or the same operations with various syntax. Read-in data, tidy, transform, subset, join with other data sources, summarise, export. If you believe the reasoning above, the Tidyverse offers a very compelling case for being the primary method for doing this work.
+
+The benefit of everyone follows a similar format, ie. Tidyverse functions over base R or data.table, are:
+
+-   colleagues can adapt others' work, building on their ideas
+-   Picking up people's work is easier to understand and quicker to pickup.
