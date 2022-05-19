@@ -1,0 +1,28 @@
+[aoc day 1](https://adventofcode.com/2021/day/1)
+
+Task: count the number of times a depth measurement increases from the previous measurement. (There is no measurement before the first measurement.)
+
+<https://adventofcode.com/2021/day/1>
+
+```{r}
+aoc_day1 <- readr::read_lines("data/aoc_data/aoc_day1.txt")
+```
+
+## Part 1
+
+```{r}
+tibble(reading = aoc_day1) %>% 
+  mutate(diff = if_else(reading > lag(reading),"higher","lower")) %>% 
+  count(diff)
+```
+
+## Part 2
+
+```{r}
+tibble(reading = aoc_day1) %>% 
+  mutate(reading = as.integer(reading),
+    reading = reading + lead(reading,1) + lead(reading,2),
+    diff = if_else(reading > lag(reading),"higher","lower")) %>% 
+  count(diff)
+```
+

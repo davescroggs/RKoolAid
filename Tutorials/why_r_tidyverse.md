@@ -3,7 +3,15 @@
 
 # Why Tidyverse?
 
--   There’s a function(s) or package for everything
+-   Function(s) or package for everything
+-   Tools designed for efficient EDA
+-   Functions describe their actions
+-   Provide a consistent format for organisations to build on
+
+### Tidyverse packages
+
+These packages and functions are well maintained, open source, and under
+continual improvement.
 
     -   dplyr: data manipulation
 
@@ -15,22 +23,38 @@
 
     -   lubridate: date/time maniupulation
 
-    -   readr: read different data types These packages and functions
-        are well maintained, open source, and under continual
-        improvement
+    -   readr: read different data types
 
-## EDA, all day
+### Exploratory Data Analysis
 
 Exploratory Data Analysis (EDA) is a fundamental skill in data science.
-Tidyverse functions
+Often one of the first tasks on any new project is understanding the
+data you’re going to be working on. What data types are you working
+with? What are the underlying distributions? How “clean” is the data?
+Are there any inconsistencies you need to account for?
+
+Tidyverse data transformation functions, paired with their easy
+connection to ggplot functions, are very good for quickly understanding
+large data sets.
 
 ``` r
-data()
-rm(txhousing)
-#> Warning in rm(txhousing): object 'txhousing' not found
+datasets::faithful %>% 
+  as_tibble() %>% 
+  ggplot(aes(eruptions,waiting)) +
+  geom_point() +
+  geom_density2d() +
+  theme_bw() +
+  labs(title = "Old faithful",
+       subtitle = "Relationship between eruption duration and time between eruptions") +
+  theme(plot.title = element_text(hjust = 0.5),
+    plot.subtitle = element_text(hjust = 0.5),
+    plot.caption = element_text(hjust = 1),
+    plot.background = element_rect(colour = "black"))
 ```
 
-## QA, ’erry day
+![](why_r_tidyverse_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+
+### Quality Assurance
 
 There are lots of different ways to solve problems, some ways offer more
 transparent methods for checking whether the result was as intended. By
@@ -96,7 +120,7 @@ titanic::titanic_train %>%
 #> 1     0 110152 86.5   B77        S   the
 ```
 
-## Tidyverse code doubles as pseudo-comments
+### Tidyverse code doubles as pseudo-comments
 
 From the [dplyr site](https://dplyr.tidyverse.org) - *“dplyr is a
 grammar of data manipulation, providing a consistent set of verbs that
@@ -140,6 +164,18 @@ mental model of stepping through a process. These actions never alter
 temporary and reversible, allowing for a trial and error process in
 applying each transform.
 
-## One in, all in
+### Leveraging off each others’ work
 
-If everyone follows a similar
+In most cases, EDA and data manipulation follows a similar format,
+irrespective of the language or library being used. These languages and
+libraries all do similar or the same operations with various syntax.
+Read-in data, tidy, transform, subset, join with other data sources,
+summarise, export. If you believe the reasoning above, the Tidyverse
+offers a very compelling case for being the primary method for doing
+this work.
+
+The benefit of everyone follows a similar format, ie. Tidyverse
+functions over base R or data.table, are:
+
+-   picking up people’s work is faster and easier to understand
+-   colleagues can adapt others’ work, building on their ideas

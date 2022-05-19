@@ -1,0 +1,114 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(tidyverse)
+```
+
+# Tidyverse workhorse functions
+
+## The functions you will use all the time
+
+-   %>%
+
+-   select
+
+-   filter
+
+-   group_by
+
+-   mutate
+
+-   summarise
+
+-   head/tail/slice
+
+-   arrange
+
+-   tibble
+
+## Pipes - %>%
+
+Pipes an object forward into a function or call expression. By defauly, pipes take the result of the left hand side expression and puts it in the first argument of the following function/call, without having to specify the argument. It allows you to string together functions step-by-step, without saving the intermediate steps to variables. Tidyverse functions typically set their first argument as the *data* argument, ww . The short-cut for entering a pipe in RStudio is cntrl + shift + M.
+
+```{r}
+select(mtcars,vs)
+
+mtcars %>% 
+  select(vs)
+
+mtcars %>% 
+  rownames_to_column(var = "carName") %>% 
+  mutate(make = str_extract(carName,"\\w+")) %>% 
+  group_by(make) %>% 
+  summarise(mpg = mean(mpg)) %>% 
+  arrange(-mpg) %>% 
+  head(10)
+
+
+mtcars %>% {select(.,vs)}
+```
+
+
+## select
+
+```{r}
+# Reference by individual name
+mtcars %>% 
+  select(mpg,cyl)
+
+# Refernce by index
+mtcars %>% 
+  select(1,2)
+
+# Select a range
+mtcars %>% 
+  select(mpg:hp,6:8)
+
+# Deselect
+mtcars %>% 
+  select(-c(mpg,hp))
+
+# Select by string - all
+col_names_all <- c("mpg","cyl")
+mtcars %>% 
+  select(all_of(col_names_all))
+
+# Select by string - all
+col_names_any <- c("mpg","cyl","duck")
+mtcars %>% 
+  select(any_of(col_names_any))
+
+# Error
+mtcars %>% 
+  select(all_of(col_names_any))
+
+# Reorder, include everything
+mtcars %>% 
+  select(vs,am,everything())
+
+# Rename columns during select, note it will only keep those listed
+mtcars %>% 
+  select(cylinders = cyl)
+```
+
+## filter
+
+## group_by
+
+##  mutate
+
+##  summarise
+
+##  head/tail/slice
+
+##  arrange
+
+##  tibble

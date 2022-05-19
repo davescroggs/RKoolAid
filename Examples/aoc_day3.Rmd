@@ -1,0 +1,67 @@
+[aoc day 1](https://adventofcode.com/2021/day/2)
+
+Task: Calculate the horizontal position and depth you would have after following the planned course. What do you get if you multiply your final horizontal position by your final depth?
+
+-   forward X increases the horizontal position by X units
+-   down X increases the depth by X units
+-   up X decreases the depth by X units
+
+<https://adventofcode.com/2021/day/1>
+
+```{r}
+library(here)
+library(tidyverse)
+library(magrittr)
+data_file <- here("data/aoc_data/aoc_day2.txt")
+aoc_day2 <- readr::read_lines(data_file)
+test <- readr::read_lines("forward 5
+down 5
+forward 8
+up 3
+down 8
+forward 2")
+```
+
+## Part 1
+
+```{r}
+results <- tibble(reading = aoc_day2) %>% 
+  mutate(direction = str_extract(reading,"\\w+"),
+         distance = str_extract(reading,"\\d+")) 
+  
+results %>% 
+  count(direction)
+
+results %>% 
+  count(distance)
+
+results %>% 
+  mutate(plane = if_else(direction == "forward","horizontal","vertical"),
+         distance = as.integer(distance),
+         distance = if_else(direction == "up",-distance,distance)) %>% 
+  group_by(plane) %>% 
+  summarise(position = sum(distance))
+```
+
+## Part 2
+
+In addition to horizontal position and depth, you'll also need to track a third value, aim, which also starts at 0. The commands also mean something entirely different than you first thought:
+
+-   down X increases your aim by X units.
+-   up X decreases your aim by X units.
+-   forward X does two things:
+-       It increases your horizontal position by X units.
+-       It increases your depth by your aim multiplied by X.
+
+```{r}
+results %>% 
+  mutate(plane = if_else(direction == "forward","horizontal","vertical"),
+         distance = as.integer(distance),
+         distance = if_else(direction == "up",-distance,distance),
+         aim = cumsum(if_else(plane == "vertical",distance,0L)),
+         horiz_pos = cumsum(if_else(plane == "horizontal",distance,0L)),
+         depth = if_else(plane == "horizontal",aim * distance,0L),
+         depth_cumsum = cumsum(depth)) %>% 
+  tail(1) %$%
+  (horiz_pos * depth_cumsum)
+```

@@ -35,16 +35,28 @@ These packages and functions are well maintained, open source, and under continu
 
     -   readr: read different data types
 
-### EDA, all day
+### Exploratory Data Analysis
 
-Exploratory Data Analysis (EDA) is a fundamental skill in data science. Tidyverse functions
+Exploratory Data Analysis (EDA) is a fundamental skill in data science. Often one of the first tasks on any new project is understanding the data you're going to be working on. What data types are you working with? What are the underlying distributions? How "clean" is the data? Are there any inconsistencies you need to account for?
+
+Tidyverse data transformation functions, paired with their easy connection to ggplot functions, are very good for quickly understanding large data sets.
 
 ```{r}
-data()
-rm(txhousing)
+datasets::faithful %>% 
+  as_tibble() %>% 
+  ggplot(aes(eruptions,waiting)) +
+  geom_point() +
+  geom_density2d() +
+  theme_bw() +
+  labs(title = "Old faithful",
+       subtitle = "Relationship between eruption duration and time between eruptions") +
+  theme(plot.title = element_text(hjust = 0.5),
+    plot.subtitle = element_text(hjust = 0.5),
+    plot.caption = element_text(hjust = 1),
+    plot.background = element_rect(colour = "black"))
 ```
 
-### QA, 'erry day
+### Quality Assurance
 
 There are lots of different ways to solve problems, some ways offer more transparent methods for checking whether the result was as intended. By storing data in tables and retaining the original value, you can use various methods to check the result.
 
@@ -97,11 +109,11 @@ Additionally, pipes allow for chaining together logical, step-wise and reversibl
 
 The chain of transforms applied to each step is logical, following a mental model of stepping through a process. These actions never alter (unless specified) the underlying data-set, meaning that any changes are temporary and reversible, allowing for a trial and error process in applying each transform.
 
-### One in, all in - Consistent format
+### Leveraging off each others' work
 
 In most cases, EDA and data manipulation follows a similar format, irrespective of the language or library being used. These languages and libraries all do similar or the same operations with various syntax. Read-in data, tidy, transform, subset, join with other data sources, summarise, export. If you believe the reasoning above, the Tidyverse offers a very compelling case for being the primary method for doing this work.
 
 The benefit of everyone follows a similar format, ie. Tidyverse functions over base R or data.table, are:
 
+-   picking up people's work is faster and easier to understand
 -   colleagues can adapt others' work, building on their ideas
--   Picking up people's work is easier to understand and quicker to pickup.

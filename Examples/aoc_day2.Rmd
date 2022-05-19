@@ -1,0 +1,45 @@
+[aoc day 3](https://adventofcode.com/2021/day/3)
+
+Task: 
+
+
+
+```{r}
+library(here)
+library(tidyverse)
+
+data_file <- here("data/aoc_data/aoc_day3.txt")
+aoc_day3 <- readr::read_lines(data_file)
+```
+
+## Part 1
+
+```{r}
+#results <- 
+  tibble(reading = aoc_day3)
+  
+  
+```
+
+## Part 2
+
+In addition to horizontal position and depth, you'll also need to track a third value, aim, which also starts at 0. The commands also mean something entirely different than you first thought:
+
+-   down X increases your aim by X units.
+-   up X decreases your aim by X units.
+-   forward X does two things:
+-       It increases your horizontal position by X units.
+-       It increases your depth by your aim multiplied by X.
+
+```{r}
+results %>% 
+  mutate(plane = if_else(direction == "forward","horizontal","vertical"),
+         distance = as.integer(distance),
+         distance = if_else(direction == "up",-distance,distance),
+         aim = cumsum(if_else(plane == "vertical",distance,0L)),
+         horiz_pos = cumsum(if_else(plane == "horizontal",distance,0L)),
+         depth = if_else(plane == "horizontal",aim * distance,0L),
+         depth_cumsum = cumsum(depth)) %>% 
+  tail(1) %$%
+  (horiz_pos * depth_cumsum)
+```
