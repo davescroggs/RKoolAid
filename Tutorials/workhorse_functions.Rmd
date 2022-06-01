@@ -87,8 +87,9 @@ mtcars %>%
   select(any_of(col_names_any))
 
 # Error
+col_names_all <- c("mpg","cyl")
 mtcars %>% 
-  select(all_of(col_names_any))
+  select(all_of(col_names_all))
 
 # Reorder, include everything
 mtcars %>% 
@@ -101,14 +102,144 @@ mtcars %>%
 
 ## filter
 
-## group_by
+```{r}
+flights <- nycflights13::flights
+
+# Numerical filtering
+flights %>%
+  filter(month >= 6, day == 1)
+
+# is eqivalent to
+flights %>%
+  filter(month >= 6 & day == 1)
+
+# Filter for specific values
+flights %>%
+  filter(month %in% c(1,3,5,7,9))
+
+# Betwween two numbers
+# Between matches EQUAL and larger/smaller. 
+flights %>% 
+  filter(between(month,6,8)) %>% 
+  count(month)
+
+# Grouped filters
+flights %>% 
+  group_by(tailnum) %>% 
+  filter(all(dep_delay < 0))
+
+# String filters
+nycflights13::airports %>% 
+  filter(name == "Williams County Airport")
+
+nycflights13::airports %>% 
+  filter(str_detect(name,"County"))
+```
+
 
 ##  mutate
 
+```{r}
+flights %>% 
+  mutate(ave_speed = distance/air_time*60)
+
+flights %>% 
+  transmute(arr_delay,
+            on_time1 = arr_delay < 0,
+            on_time2 = if_else(arr_delay > 0,"Late","On-time"),
+            # Functions that return a single result will be repeated in each row
+            ave_delay_mean = mean(arr_delay,na.rm = T),
+            ave_delay = arr_delay > 0)
+
+flights %>% 
+  transmute(across(c(dep_time,arr_time),as.character),
+            dep_time = str_pad(dep_time,4,pad = "0",side = "left"),
+            dep_hour = str_sub(dep_time,start = 1,end = 2),
+            dep_min = str_sub(dep_time,start = 3,end = 4))
+```
+
+
 ##  summarise
+
+```{r}
+flights %>% 
+  summarise(n = n(),
+            mean_late = mean(arr_delay,na.rm = T),
+            sd = mean(arr_delay,na.rm = T))
+
+
+flights %>% 
+  group_by(origin) %>% 
+  summarise(n = n(),
+            mean_late = mean(arr_delay,na.rm = T),
+            sd = mean(arr_delay,na.rm = T))
+
+flights %>% 
+  group_by(origin) %>% 
+  summarise(unique_destinations = n_distinct(dest),
+            unique_carriers = n_distinct(carrier))
+
+```
+
 
 ##  head/tail/slice
 
+```{r}
+flights %>% 
+  head()
+
+flights %>% 
+  tail(10)
+
+flights %>% 
+  group_by(tailnum) %>% 
+  arrange(month,day,dep_time) %>% 
+  slice(1)
+
+flights %>% 
+  group_by(tailnum) %>% 
+  arrange(month,day,dep_time) %>% 
+  slice(1)
+
+flights %>% 
+  arrange(distance) %>% 
+  slice(1:5,(n() - 4):n())
+
+flights %>% 
+  group_by(tailnum) %>% 
+  slice_max(distance,n = 1,with_ties = F)
+```
+
+
+## group_by
+```{r}
+
+print_return <- function(x) {
+  print(x)
+  x
+}
+
+example_data <- 
+  tibble(dat = 1:6,grp = rep(c("A","B"),times = 3)) 
+
+example_data %>% 
+  mutate(ret = print_return(dat),
+         min_dat = min(ret))
+
+example_data %>% 
+  group_by(grp) %>% 
+  mutate(ret = print_return(dat),
+         min_dat = min(ret))  
+```
+
+
 ##  arrange
 
-##  tibble
+```{r}
+flights %>% 
+  distinct(carrier,month,day) %>% 
+  arrange(desc(carrier),-month,-day) %>% 
+  select(carrier,month,day) 
+  
+```
+
