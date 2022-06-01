@@ -102,6 +102,8 @@ mtcars %>%
 
 ## filter
 
+The filter
+
 ```{r}
 flights <- nycflights13::flights
 
@@ -230,6 +232,16 @@ example_data %>%
   group_by(grp) %>% 
   mutate(ret = print_return(dat),
          min_dat = min(ret))  
+
+flights %>% 
+  mutate(carrier = fct_lump(carrier,n = 10)) %>% 
+  group_by(origin,carrier) %>% 
+  summarise(n = n()) %>% 
+  mutate(pct = n/sum(n)) %>% 
+  arrange(origin,carrier) %>% 
+  ggplot(aes(y = fct_reorder(carrier,pct), x = pct )) +
+  geom_point() +
+  facet_wrap(~origin,scales = "free_y")
 ```
 
 
