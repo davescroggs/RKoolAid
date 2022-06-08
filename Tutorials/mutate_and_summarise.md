@@ -3,8 +3,6 @@
 
 # Tutorial - Mutate & Summarise
 
-From the description
-
 ## Mutate
 
 `mutate()` adds new variables and preserves existing ones; transmute()
@@ -18,22 +16,77 @@ length of the group. Functions that are called inside mutate can take
 column names as an argument which will input the column **as a vector**
 (or sections of the vector by group).
 
+### Anatomy of a mutate function
+
+Basic mutate calls have a simple construction. Each new column needs a
+name, each column is assigned an atomic vector (a vector of the same
+data type).
+
+``` r
+mutate(data,{column name} = {vector})
+
+data %>%
+   mutate(column1 = function(val1,val2))
+
+# is equivalent to
+data %>%
+   mutate(column1 = function(data$val1,data$val2))
+```
+
+## Evaluation
+
+Below are some examples of mutate
+
 ``` r
 print_and_return <- function(x) {
   print(x)
   return(x)
 }
 
-tbl <- tibble(A = 1:4,grp = rep(LETTERS[1:2],each = 2)) %>% 
+example_data <- tibble(A = 1:4,grp = rep(LETTERS[1:2],each = 2))
+
+example_data %>% 
   mutate(res = print_and_return(A))
 #> [1] 1 2 3 4
+#> # A tibble: 4 × 3
+#>       A grp     res
+#>   <int> <chr> <int>
+#> 1     1 A         1
+#> 2     2 A         2
+#> 3     3 B         3
+#> 4     4 B         4
 
 # Vectors by group
-tbl <- tibble(A = 1:4,grp = rep(LETTERS[1:2],each = 2)) %>% 
+example_data %>%
   group_by(grp) %>% 
   mutate(res = print_and_return(A))
 #> [1] 1 2
 #> [1] 3 4
+#> # A tibble: 4 × 3
+#> # Groups:   grp [2]
+#>       A grp     res
+#>   <int> <chr> <int>
+#> 1     1 A         1
+#> 2     2 A         2
+#> 3     3 B         3
+#> 4     4 B         4
+
+# Rowwise function
+example_data %>%
+  rowwise() %>% 
+  mutate(res = print_and_return(A))
+#> [1] 1
+#> [1] 2
+#> [1] 3
+#> [1] 4
+#> # A tibble: 4 × 3
+#> # Rowwise: 
+#>       A grp     res
+#>   <int> <chr> <int>
+#> 1     1 A         1
+#> 2     2 A         2
+#> 3     3 B         3
+#> 4     4 B         4
 ```
 
 ### Vectorised functions
@@ -48,7 +101,6 @@ tibble(A = 1:3,B = 4:6) %>%
 #> 1     1     4    21     5
 #> 2     2     5    21     7
 #> 3     3     6    21     9
-
 
 tibble(A = 1:3,B = 4:6) %>% 
   mutate(C = max(A,B),
@@ -74,13 +126,13 @@ dat %>%
 #> # Rowwise: 
 #>        A      B      C
 #>    <dbl>  <dbl>  <dbl>
-#> 1  0.288 -2.41  -2.12 
-#> 2 -0.532  1.82   1.29 
-#> 3 -0.185 -0.124 -0.309
+#> 1 -1.25  -0.675 -1.92 
+#> 2  0.500  1.02   1.52 
+#> 3 -1.22   2.08   0.861
 #> # … with 99,997 more rows
 
 Sys.time() - start_time
-#> Time difference of 0.6779749 secs
+#> Time difference of 0.5869629 secs
 
 start_time = Sys.time()
 dat %>% 
@@ -89,12 +141,12 @@ dat %>%
 #> # A tibble: 100,000 × 3
 #>        A      B      D
 #>    <dbl>  <dbl>  <dbl>
-#> 1  0.288 -2.41  -2.12 
-#> 2 -0.532  1.82   1.29 
-#> 3 -0.185 -0.124 -0.309
+#> 1 -1.25  -0.675 -1.92 
+#> 2  0.500  1.02   1.52 
+#> 3 -1.22   2.08   0.861
 #> # … with 99,997 more rows
 Sys.time() - start_time
-#> Time difference of 0.02084613 secs
+#> Time difference of 0.05113292 secs
 ```
 
 If a single result is given for a group, it is repeated for the length
@@ -107,11 +159,11 @@ tibble(A = rnorm(5)) %>%
 #> # A tibble: 5 × 3
 #>        A     B      C
 #>    <dbl> <dbl>  <dbl>
-#> 1 -0.214     1 -0.489
-#> 2 -0.351     1 -0.489
-#> 3  0.371     1 -0.489
-#> 4 -0.875     1 -0.489
-#> 5 -1.37      1 -0.489
+#> 1  0.184     1 -0.328
+#> 2 -1.20      1 -0.328
+#> 3  0.166     1 -0.328
+#> 4  0.122     1 -0.328
+#> 5 -0.910     1 -0.328
 ```
 
 ### Common use cases
