@@ -1,0 +1,68 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r}
+library(tidyverse)
+
+diamonds
+```
+
+1.  Explore the distribution of each of the x, y, and z variables in diamonds. What do you learn? Think about a diamond and how you might decide which dimension is the length, width, and depth.
+
+```{r}
+diamonds %>% 
+  ggplot(aes(x)) +
+  geom_density()
+
+diamonds %>% 
+  select(x,y,z) %>% 
+  pivot_longer(everything(),names_to = "name",values_to = "value") %>% 
+  ggplot(aes(value,name,fill = name)) +
+  geom_boxplot()
+```
+
+
+2.  Explore the distribution of price. Do you discover anything unusual or surprising? (Hint: Carefully think about the binwidth and make sure you try a wide range of values.)
+
+```{r}
+diamonds %>% 
+  ggplot(aes(price)) +
+  geom_histogram(binwidth = 50)
+```
+
+```{r}
+diamonds %>% 
+  mutate(cuts = cut_interval(price,length = 10)) %>% 
+  filter(between(price,500, 5000)) %>% 
+  count(cuts) %>% 
+  arrange(n)
+```
+
+
+3.  How many diamonds are 0.99 carat? How many are 1 carat? What do you think is the cause of the difference?
+
+```{r}
+diamonds %>% 
+  ggplot(aes(carat)) +
+  geom_histogram(binwidth = 0.05) +
+  scale_x_continuous(minor_breaks = seq(0,5,0.25))
+```
+
+
+4.  Compare and contrast coord_cartesian() vs xlim() or ylim() when zooming in on a histogram. What happens if you leave binwidth unset? What happens if you try and zoom so only half a bar shows?
+```{r}
+diamonds %>% 
+  ggplot(aes(carat,price)) +
+  geom_point(alpha = 0.3)
+
+diamonds %>% 
+  ggplot(aes(carat,price)) +
+  geom_point(data = ~select(.,-cut),col = "grey",alpha = 0.2) +
+  geom_point(aes(col = cut),alpha = 0.5) +
+  facet_wrap(~cut)
+
+```
+
